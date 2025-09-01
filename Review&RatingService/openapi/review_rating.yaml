@@ -1,0 +1,77 @@
+openapi: 3.0.3
+info:
+  title: Review & Rating Service API
+  version: 1.0.0
+  description: Manages creation, retrieval, and moderation of reviews and ratings.
+
+servers:
+  - url: http://localhost:8105
+    description: Local
+  - url: https://review.foodly.example.com
+    description: Production
+
+tags:
+  - name: Reviews
+
+paths:
+  /reviews:
+    get:
+      tags: [Reviews]
+      summary: List reviews for a hotel
+      parameters:
+        - in: query
+          name: hotelId
+          required: true
+          schema: { type: string }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 20, minimum: 1, maximum: 100 }
+      responses:
+        '200':
+          description: Reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Review' }
+    post:
+      tags: [Reviews]
+      summary: Create review
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReviewCreateRequest' }
+      responses:
+        '201':
+          description: Review created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Review' }
+
+components:
+  schemas:
+    Review:
+      type: object
+      required: [id, subjectId, subjectType, rating, userId, createdAt]
+      properties:
+        id: { type: string }
+        subjectId: { type: string }
+        subjectType:
+          type: string
+          enum: [hotel, order, courier]
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        comment: { type: string }
+        userId: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    ReviewCreateRequest:
+      type: object
+      required: [subjectId, subjectType, rating]
+      properties:
+        subjectId: { type: string }
+        subjectType:
+          type: string
+          enum: [hotel, order, courier]
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        comment: { type: string }
